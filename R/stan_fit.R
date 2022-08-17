@@ -1,23 +1,22 @@
-require(cmdstanr)
-
-stan_fit <- function(model, data, var){
+stan_fit <- function(model_file, data, var){
+  
+  model <- cmdstan_model(model_file)
+  data_list <- stan_data(data, var)
+  
     fit <- model$sample(
         data = stan_data(data, var),
-        chains = 4,
+        chains = 8,
+        parallel_chains = 8,
         refresh = 10,
-        parallel_chains = 4,
-        iter_warmup = 50,
-        iter_sampling = 50,
+        iter_warmup = 200,
+        iter_sampling = 800,
         init = 0,
         adapt_delta = 0.9
     )
 
-    fit$save_output_files(dir = "stan",
-     basename = var,
-      timestamp = FALSE,
-       random = FALSE)
-
-    post <- extract_samples(fit)
-
-    return(list(post = post, fit = fit))
+    return(list(
+      post = extract_samples(fit),
+      diagnostics = fit$diagnostic_summary()
+      )
+      )
 }

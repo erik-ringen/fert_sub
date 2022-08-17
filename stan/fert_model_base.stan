@@ -76,13 +76,13 @@ model{
 
   // Compose parameters
   for (n in 1:N_id) {
-    k[n] = exp( a_k + pop_v[pop_id[n],1] + pid_v[n,1] );
+    k[n] = exp(a_k + pop_v[pop_id[n],1] + pid_v[n,1]);
     
-    b[n] = exp( a_b + pop_v[pop_id[n],2] + pid_v[n,2] );
+    b[n] = exp(a_b + pop_v[pop_id[n],2] + pid_v[n,2]);
     
-    alpha[n] = exp( a_alpha + pop_v[pop_id[n],3] + pid_v[n,3] + (b_BY[1] + pop_BY_v[pop_id[n],1])*birthyear_s[n]  );
+    alpha[n] = exp(a_alpha + pop_v[pop_id[n],3] + pid_v[n,3] + (b_BY[1] + pop_BY_v[pop_id[n],1])*birthyear_s[n]);
     
-    p[n] = inv_logit( a_p + pop_v[pop_id[n],4] );
+    p[n] = inv_logit(a_p + pop_v[pop_id[n],4]);
   }
     
         for (i in 1:N_obs) { 
