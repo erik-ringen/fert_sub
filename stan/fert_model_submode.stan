@@ -20,39 +20,39 @@ parameters {
     
     vector[1] b_BY; // avg effect of birth year
     
-    matrix[N_pop,1] pop_BY_z;
+    matrix[N_pop, 1] pop_BY_z;
     vector<lower=0>[1] sigma_pop_BY;
     
     // Random effects //
-    matrix[N_id,3] pid_z; // individual-level random effects, unscaled and uncorrelated
+    matrix[N_id, 3] pid_z; // individual-level random effects, unscaled and uncorrelated
     vector[3] a_sigma_pid; // scale par for pid, avg
     
-    matrix[N_pop,3] pid_pop_z;
+    matrix[N_pop, 3] pid_pop_z;
     vector<lower=0>[3] sigma_pop_pid; // variance in the variance...
 
-    matrix[N_pop,4] pop_z; // population-level random effects
+    matrix[N_pop, 4] pop_z; // population-level random effects
     vector<lower=0>[4] sigma_pop; // 
     
-    matrix[N_sub,3] sub_z; // subtype random effects
+    matrix[N_sub, 3] sub_z; // subtype random effects
     vector<lower=0>[3] sigma_sub;
 }
 
 transformed parameters{
-  matrix[N_id,3] pid_v;
-  matrix[N_pop,4] pop_v;
-  matrix[N_pop,1] pop_BY_v;
-  matrix[N_sub,3] sub_v;
+  matrix[N_id, 3] pid_v;
+  matrix[N_pop, 4] pop_v;
+  matrix[N_pop, 1] pop_BY_v;
+  matrix[N_sub, 3] sub_v;
   
   // Scale random effects //
   for (n in 1:N_id)
-  for (j in 1:3 ) {
-  pid_v[n,j] = pid_z[n,j] * exp( a_sigma_pid[j] + pid_pop_z[pop_id[n],j]*sigma_pop_pid[j] );
+  for (j in 1:3) {
+  pid_v[n, j] = pid_z[n, j] * exp(a_sigma_pid[j] + pid_pop_z[pop_id[n], j]*sigma_pop_pid[j]);
   }
   
-  for (j in 1:4) pop_v[,j] = pop_z[,j] * sigma_pop[j];
-  pop_BY_v[,1] = pop_BY_z[,1] * sigma_pop_BY[1];
+  for (j in 1:4) pop_v[, j] = pop_z[, j] * sigma_pop[j];
+  pop_BY_v[, 1] = pop_BY_z[, 1] * sigma_pop_BY[1];
   
-  for (j in 1:3) sub_v[,j] = sub_z[,j] * sigma_sub[j];
+  for (j in 1:3) sub_v[, j] = sub_z[, j] * sigma_sub[j];
   
 } // end transformed parameters block
 
@@ -85,13 +85,13 @@ model{
 
   // Compose parameters
   for (n in 1:N_id) {
-    k[n] = exp( a_k + pop_v[pop_id[n],1] + pid_v[n,1] + sub_v[sub_id[n],1] );
+    k[n] = exp(a_k + pop_v[pop_id[n], 1] + pid_v[n, 1] + sub_v[sub_id[n], 1]);
     
-    b[n] = exp( a_b + pop_v[pop_id[n],2] + pid_v[n,2] + sub_v[sub_id[n],2] );
+    b[n] = exp(a_b + pop_v[pop_id[n], 2] + pid_v[n, 2] + sub_v[sub_id[n], 2]);
     
-    alpha[n] = exp( a_alpha + pop_v[pop_id[n],3] + pid_v[n,3] + sub_v[sub_id[n],3] + (b_BY[1] + pop_BY_v[pop_id[n],1])*birthyear_s[n]  );
+    alpha[n] = exp(a_alpha + pop_v[pop_id[n], 3] + pid_v[n, 3] + sub_v[sub_id[n], 3] + (b_BY[1] + pop_BY_v[pop_id[n], 1])*birthyear_s[n]);
     
-    p[n] = inv_logit( a_p + pop_v[pop_id[n],4] );
+    p[n] = inv_logit(a_p + pop_v[pop_id[n], 4]);
   }
     
         for (i in 1:N_obs) { 

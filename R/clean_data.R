@@ -64,9 +64,9 @@ d_raw$birth_year <- d_raw$year - d_raw$age
 
 d_raw <- d_raw %>%
   group_by(population) %>%
-  mutate(
+    mutate(
     # standardize to 20 year-units
-    birthyear_s = (birth_year - median(birth_year)) / 20)
+      birthyear_s = (birth_year - mean(birth_year)) / 20)
 
 # Pivot long with respect to births...
 # we want a row for first birth and number of current births

@@ -16,7 +16,7 @@ parameters {
     real a_b; // avg b
     real a_p; // avg p
     
-    vector[1] b_BY; // avg effect of birth year
+    real b_BY; // avg effect of birth year
     
     matrix[N_pop,1] pop_BY_z;
     vector<lower=0>[1] sigma_pop_BY;
