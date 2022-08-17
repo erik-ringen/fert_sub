@@ -36,7 +36,7 @@ parameters {
     real a_b; // avg b
     real a_p; // avg p
     
-    vector[1] b_BY; // avg effect of birth year
+    real b_BY; // avg effect of birth year
     
     matrix[N_pop, 1] pop_BY_z;
     vector<lower=0>[1] sigma_pop_BY;
@@ -120,7 +120,7 @@ model{
     
     b[n] = exp(a_b + pop_v[pop_id[n], 2] + pid_v[n, 2] + (b_ord[2] + pop_v[pop_id[n], 6])*mo(softmax(pop_scale[pop_id[n], , 2]), ord_pred[n]));
     
-    alpha[n] = exp(a_alpha + pop_v[pop_id[n], 3] + pid_v[n, 3] + (b_BY[1] + pop_BY_v[pop_id[n], 1])*birthyear_s[n] + (b_ord[3] + pop_v[pop_id[n], 7])*mo(softmax(pop_scale[pop_id[n], , 3]), ord_pred[n]));
+    alpha[n] = exp(a_alpha + pop_v[pop_id[n], 3] + pid_v[n, 3] + (b_BY + pop_BY_v[pop_id[n], 1])*birthyear_s[n] + (b_ord[3] + pop_v[pop_id[n], 7])*mo(softmax(pop_scale[pop_id[n], , 3]), ord_pred[n]));
     
     p[n] = inv_logit(a_p + pop_v[pop_id[n], 4]);
   }

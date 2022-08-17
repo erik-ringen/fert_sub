@@ -80,7 +80,7 @@ model{
     
     b[n] = exp(a_b + pop_v[pop_id[n],2] + pid_v[n,2]);
     
-    alpha[n] = exp(a_alpha + pop_v[pop_id[n],3] + pid_v[n,3] + (b_BY[1] + pop_BY_v[pop_id[n],1])*birthyear_s[n]);
+    alpha[n] = exp(a_alpha + pop_v[pop_id[n],3] + pid_v[n,3] + (b_BY + pop_BY_v[pop_id[n],1])*birthyear_s[n]);
     
     p[n] = inv_logit(a_p + pop_v[pop_id[n],4]);
   }
