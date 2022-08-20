@@ -7,7 +7,7 @@ d <- data
 # Order market levels
 d$market <- factor(droplevels(d$market),
  levels = c("low", "medium", "high"))
-d$MI <- as.numeric(d$market)-1
+d$MI <- as.numeric(d$market) - 1
 
 d_pid <- d %>%
   group_by(pid) %>%
