@@ -2,38 +2,55 @@ require(tidyverse)
 
 stan_data <- function(data, var = "base"){
 
-d <- data
+dat <- data
+
+if (var == "test") dat <- dat[sample(1:nrow(dat), size = 2000, replace = T),]
+if (var == "submode") {
+  dat <- dplyr::filter(dat, subsist != "labour") # excludes Mestizo Altiplano
+  dat$sub_id <- match(dat$sub_id, unique(dat$sub_id)) # reset indices
+}
+
+# Make stan friendly index
+dat$pid <- match(dat$pid, unique(dat$pid))
+dat$pop_id <- match(dat$pop_id, unique(dat$pop_id))
 
 # Order market levels
-d$market <- factor(droplevels(d$market),
+dat$market <- factor(droplevels(dat$market),
  levels = c("low", "medium", "high"))
-d$MI <- as.numeric(d$market) - 1
+dat$MI <- as.numeric(dat$market) - 1
 
-d_pid <- d %>%
+d_pid <- dat %>%
   group_by(pid) %>%
   summarise(pop_id = unique(pop_id),
             birthyear_s = unique(birthyear_s),
             sub_id = unique(sub_id),
             MI = unique(MI))
 
-d_pop <- d %>%
+d_pop <- dat %>%
   group_by(pop_id) %>%
   summarise(pop_name = unique(population))
 
+# Data that goes into every model
 data_list <- list(
-  N_obs = nrow(d),
-  N_id = max(d$pid),
-  N_pop = max(d$pop_id),
+  N_obs = nrow(dat),
+  N_id = max(dat$pid),
+  N_pop = max(dat$pop_id),
   pop_id = d_pid$pop_id,
-  pid = d$pid,
-  age = d$age/80,
-  live_births = d$livebirths,
+  pid = dat$pid,
+  age = dat$age/80,
+  live_births = dat$live_births,
   birthyear_s = d_pid$birthyear_s
 )
 
+# Data for specific models only
 if (var == "MI") {
   data_list$MI <- d_pid$MI
   data_list$N_MI <- max(d_pid$MI)
+}
+
+if (var == "submode") {
+  data_list$sub_id <- d_pid$sub_id
+  data_list$N_sub <- max(d_pid$sub_id)
 }
 
 return(data_list)

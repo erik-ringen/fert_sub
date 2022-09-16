@@ -83,7 +83,7 @@ d_long$market <- ifelse(d_long$market == "med", "medium", d_long$market)
 d_long$market <- factor(d_long$market,
  levels = c("none", "low", "medium", "high"))
 
-d <- dplyr::select(d_long, -c(ID, live_births, name))
+d <- dplyr::select(d_long, -c(ID, livebirths, name))
 rm(d_raw, d_long, vars_keep)
 return(d)
 }
