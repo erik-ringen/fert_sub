@@ -23,7 +23,6 @@ vars_keep <- c(
      "contra",
      "proplab",
      "propHG",
-     "propag",
      "propcult",
      "residencesub",
      "livestock",
@@ -31,6 +30,9 @@ vars_keep <- c(
      "urban")
 
 d_raw$subsist <- ifelse(d_raw$subsist == "agropastoral", "past", d_raw$subsist)
+
+## Consolidate cult and ag prop (ag only applies to Toldeo)
+d_raw$propcult <- ifelse(d_raw$population == "Toledo", d_raw$propag, d_raw$propcult)
 
 d_raw <- d_raw[, vars_keep]
 
