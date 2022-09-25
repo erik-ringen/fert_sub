@@ -16,7 +16,7 @@ vars_keep <- c(
      "market",
      "wealth",
      "income",
-     "occ1",
+     "occ",
      "dietpropmarket",
      "dietpropfarm",
      "edu",
@@ -33,6 +33,9 @@ d_raw$subsist <- ifelse(d_raw$subsist == "agropastoral", "past", d_raw$subsist)
 
 ## Consolidate cult and ag prop (ag only applies to Toldeo)
 d_raw$propcult <- ifelse(d_raw$population == "Toledo", d_raw$propag, d_raw$propcult)
+
+# Contrast labor and subsistence categories of occupation
+d_raw$occ <- ifelse(d_raw$occ1 == "lab", 1, 0)
 
 d_raw <- d_raw[, vars_keep]
 

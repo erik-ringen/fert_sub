@@ -21,17 +21,17 @@ parameters {
     real b_BY; // avg effect of birth year
     
     matrix[N_sub, 2] sub_z; // subtype random effects
-    vector[2] log_sigma_sub;
+    vector<lower=0>[2] sigma_sub;
     
     vector[N_pop] pop_BY_z;
-    real log_sigma_pop_BY;
+    real<lower=0> sigma_pop_BY;
     
     // Random effects //
     matrix[N_id,2] pid_z; // individual-level random effects, unscaled and uncorrelated
-    vector[2] log_sigma_pid; // scale par for pid, log-scale for better sampling
+    vector<lower=0>[2] sigma_pid; // scale par for pid, log-scale for better sampling
 
     matrix[N_pop,4] pop_z; // population-level random effects
-    vector[4] log_sigma_pop; // 
+    vector<lower=0>[4] sigma_pop; // 
 }
 
 transformed parameters{
@@ -48,14 +48,14 @@ transformed parameters{
   // Scale random effects //
   for (n in 1:N_id)
     for (j in 1:2 ) {
-  pid_v[n,j] = pid_z[n,j] * exp(log_sigma_pid[j]);
+  pid_v[n,j] = pid_z[n,j] * sigma_pid[j];
     }
   
-  for (j in 1:4) pop_v[,j] = pop_z[,j] * exp(log_sigma_pop[j]);
+  for (j in 1:4) pop_v[,j] = pop_z[,j] * sigma_pop[j];
 
-  pop_BY_v = pop_BY_z * exp(log_sigma_pop_BY);
+  pop_BY_v = pop_BY_z * sigma_pop_BY;
   
-  for (j in 1:2) sub_v[, j] = sub_z[, j] * exp(log_sigma_sub[j]);
+  for (j in 1:2) sub_v[, j] = sub_z[, j] * sigma_sub[j];
 
   // Compose parameters
   for (n in 1:N_id) {
@@ -83,11 +83,11 @@ model{
   to_vector(pop_z) ~ std_normal();
   to_vector(sub_z) ~ std_normal();
 
-  // variance components (log scale)
-  log_sigma_pid ~ normal(-1,1);
-  log_sigma_pop ~ normal(-1,1);
-  log_sigma_pop_BY ~ normal(-1,1);
-  log_sigma_sub ~ normal(-1,1);
+  // variance components 
+  sigma_pid ~ std_normal();
+  sigma_pop ~ std_normal();
+  sigma_pop_BY ~ std_normal();
+  sigma_sub ~ std_normal();
 
   // likelihood
         for (i in 1:N_obs) { 

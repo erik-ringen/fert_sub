@@ -7,6 +7,7 @@ data{
     vector[N_obs] age;
     array[N_obs] int live_births;
     vector[N_id] birthyear_s;
+    vector[N_id] pred;
 }
 
 parameters {
@@ -52,9 +53,9 @@ transformed parameters{
 
   // Compose parameters
   for (n in 1:N_id) {
-    k[n] = exp(a_k + pop_v[pop_id[n],1] + pid_v[n,1] + pop_v[pop_id[n],5]);
+    k[n] = exp(a_k + pop_v[pop_id[n],1] + pid_v[n,1] + (b_pred[1] + pop_v[pop_id[n],5]) * pred[n]);
     b[n] = exp(a_b + pop_v[pop_id[n],2]);
-    alpha[n] = exp(a_alpha + pop_v[pop_id[n],3] + pid_v[n,2] + (b_BY + pop_BY_v[pop_id[n]])*birthyear_s[n] + pop_v[pop_id[n],6]);
+    alpha[n] = exp(a_alpha + pop_v[pop_id[n],3] + pid_v[n,2] + (b_BY + pop_BY_v[pop_id[n]])*birthyear_s[n] + (b_pred[2] + pop_v[pop_id[n],6]) * pred[n]);
     oi[n] = inv_logit(a_oi + pop_v[pop_id[n],4]);
   }
 } // end transformed parameters block

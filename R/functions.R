@@ -14,30 +14,17 @@ extract_samples <- function(cmdstanrfit, pars) {
     rethinking::extract.samples(pars = pars)
 }
 
-zaoi_mean <- function(p_nz, p_oi, lambda) {
-  return(
-    p_nz * (1 - p_oi) * (lambda/(1 - exp(-lambda))) +
-      p_nz * p_oi
-  )
+monotonic <- function(scale, level) {
+  if (is.na(level)) return(0)
+  else if (level > 0) return( sum(scale[1:level]) )
+  else return(0)
 }
 
-poisson_zaoi_rng <- function(p_nz, p_oi, lambda) {
-    nz = rbinom(1, 1, p_nz)
-    oi = rbinom(1, 1, p_oi)
-    
-    if (nz == 0) y_hat = 0
+poisson_oi_rng <- function(p_oi, lambda) {
+  n <- length(lambda)
+  oi <- rbinom(n, 1, p_oi)
 
-    if (nz == 1 & oi == 1)  y_hat = 1
-
-    if (nz == 1 & oi == 0) {
-      T = lambda
-      U = runif(1, 0, 1)
-      t = -log(1 - U*(1 - exp(-T)))
-      T1 = T - t
-      
-      if (T1 < 0) T1 = 0
-      y_hat = rpois(1, T1) + 1
-    }
-    
-    tibble(y_hat)
+  if (oi == 1) y_hat = 1
+  else y_hat = rpois(n, lambda);
+  return(y_hat)
 }
