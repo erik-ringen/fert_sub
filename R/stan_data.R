@@ -3,7 +3,7 @@ require(tidyverse)
 stan_data <- function(dat, variable = "base") {
 
 if (variable %in% c("propHG", "propcult", "proplab", "dietpropHG", "dietpropfarm", "dietpropmarket", "occ", "land", "livestock", "income", "urban", "edu")) {
-dat <- data %>% 
+dat <- dat %>% 
   mutate(pred = get(variable))
 }
 
@@ -29,7 +29,7 @@ if (variable == "edu") {
   dat <- dat %>% 
     filter(population != "Himba") %>% # measure not comparable
     # Collapse more than 12 years of edu
-    mutate(variable = ifelse(variable > 12, 13, variable))
+    mutate(pred = ifelse(pred > 12, 13, pred))
 }
 
 if (variable %in% c("propHG", "propcult", "proplab", "dietpropHG", "dietpropfarm", "dietpropmarket", "occ", "land", "livestock", "income")) {
@@ -132,5 +132,5 @@ if (variable %in% c("urban", "edu")) {
   data_list$K = max(d_pid$pred, na.rm = T)
 }
 
-return(data_list)
+return(list(data_list = data_list, df = dat))
 }

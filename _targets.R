@@ -13,7 +13,7 @@ tar_option_set(packages = c(
     "HDInterval",
     "future",
     "furrr",
-    "RColor"
+    "RColorBrewer"
 ))
 
 list(
@@ -26,7 +26,8 @@ list(
     # Establish color schemes
     tar_target(subsistence_cols,
                {x <- c("#E69F00", "#0072B2", "#009E73", "#D55E00", "#CC79A7", "indianred", "black")
-               names(x) <- c("Ag", "fish", "HG", "hort", "labour", "past", "Average")}),
+               names(x) <- c("Ag", "fish", "HG", "hort", "labour", "past", "Average")
+               return(x)}),
     
     tar_target(col_scale, scale_color_manual(name = "subtype", values = subsistence_cols)),
     tar_target(fill_scale, scale_fill_manual(name = "subtype", values = subsistence_cols)),

@@ -1,7 +1,7 @@
 stan_fit <- function(model_file, data, var) {
 
   model <- rstan::stan_model(model_file)
-  data_list <- stan_data(data, var)
+  data_list <- stan_data(data, var)$data_list
 
     fit <- sampling(
         model,

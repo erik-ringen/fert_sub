@@ -20,11 +20,13 @@ monotonic <- function(scale, level) {
   else return(0)
 }
 
-poisson_oi_rng <- function(p_oi, lambda) {
+poisson_oi_rng <- function(p_oi, lambda, n_sims) {
   n <- length(lambda)
-  oi <- rbinom(n, 1, p_oi)
+  oi <- rbinom(n = n_sims, 1, p_oi)
+  fert <- rpois(n = n_sims, lambda)
 
-  if (oi == 1) y_hat = 1
-  else y_hat = rpois(n, lambda);
+  y_hat <- rep(NA, n_sims)
+  y_hat[oi == 1] <- 1
+  y_hat[oi == 0] <- fert[oi == 0]
   return(y_hat)
 }
