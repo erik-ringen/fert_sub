@@ -4,7 +4,16 @@ require(furrr)
 plan(multisession, workers = availableCores())
 options(future.rng.onMisuse = "ignore")
 
-fig_4_a <- function(fit, data) {
+# Establish color schemes
+subsistence_cols <- c("#E69F00", "#0072B2", "#009E73", "#D55E00", "#CC79A7", "indianred", "black")
+names(subsistence_cols) <- c("Ag", "fish", "HG", "hort", "labour", "past", "Average")
+
+col_scale <- scale_color_manual(name = "subtype", values = subsistence_cols)
+fill_scale <- scale_fill_manual(name = "subtype", values = subsistence_cols) 
+
+fig_4_a <- function(fit, d) {
+  
+  data <- stan_data(d)
   post <- extract.samples(fit)
   n_samps <- length(post$lp__)
   
@@ -26,9 +35,9 @@ fig_4_a <- function(fit, data) {
   
   # Individuals within populations ##
   d_pred <- expand.grid(age = age_seq, pid = 1:data$data_list$N_id)
-  d_pred <- left_join(d_pred, select(data$df, pid, pop_id))
+  d_pred <- left_join(d_pred, select(data$df, pid, pop_id, pop_name))
   
-  m <- future_pmap(select(d_pred, -c(population)), post = post, resp = "mean", fert_pred) %>% 
+  m <- future_pmap(select(d_pred, -c("pop_name")), post = post, resp = "mean", fert_pred) %>% 
     as_tibble(.name_repair = "minimal")
   
   pred_median <- apply(m, 2, median)
@@ -40,14 +49,14 @@ fig_4_a <- function(fit, data) {
     pid = d_pred$pid
   )
   
-  pid_pred <- left_join(pid_pred, select(data$df, pid, pop_id, population, subsist, MI))
+  pid_pred <- left_join(pid_pred, select(data$df, pid, pop_id, pop_name, subsist, MI))
   
-  pid_pred$population <- fct_reorder(pid_pred$population, as.numeric(as.factor(pid_pred$subsist)))
+  pid_pred$pop_name <- fct_reorder(pid_pred$pop_name, as.numeric(as.factor(pid_pred$subsist)))
 
   pid_pred$MI <- factor(pid_pred$MI, labels = c("Low MI", "Medium MI", "High MI"))
   
   lh_curves <- ggplot(pid_pred, aes(x = age, y = med, color = subsist)) + 
-    facet_wrap(MI ~ population, labeller = label_wrap_gen(width = 6)) +
+    facet_wrap(MI ~ pop_name, labeller = label_wrap_gen(width = 6)) +
     geom_line(aes(group = pid), lwd = 0.2, alpha = 0.1 ) +
     theme_minimal(base_size = 12) + 
     xlab("") +

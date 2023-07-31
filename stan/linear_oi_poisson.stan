@@ -8,6 +8,7 @@ data{
     array[N_obs] int live_births;
     vector[N_id] birthyear_s;
     vector[N_id] pred;
+    int prior_only;
 }
 
 parameters {
@@ -83,6 +84,7 @@ model{
   sigma_pop_BY ~ std_normal();
 
   // likelihood
+  if (prior_only == 0) {
         for (i in 1:N_obs) { 
         real fert_cu;
 
@@ -99,4 +101,32 @@ model{
           target += log1m(oi[pid[i]]) + poisson_lpmf(live_births[i] | fert_cu);
         }
     }
+  }
 }
+
+generated quantities {
+   vector[N_obs] log_lik;
+   vector[N_obs] y_hat;
+
+   for (i in 1:N_obs) {
+    real fert_cu;
+    int oi_hat;
+
+    fert_cu = pow(1 - exp(-k[pid[i]]*age[i]), b[pid[i]]) * alpha[pid[i]];
+       if (live_births[i] == 1) {
+            log_lik[i] = log_sum_exp(
+            log(oi[pid[i]]),
+            log1m(oi[pid[i]]) + poisson_lpmf(live_births[i] | fert_cu)
+          );
+        }
+        
+        else {
+          log_lik[i] = log1m(oi[pid[i]]) + poisson_lpmf(live_births[i] | fert_cu);
+        }
+    
+    oi_hat = bernoulli_rng(oi[pid[i]]);
+    if (oi_hat == 1) y_hat[i] = 1;
+    else y_hat[i] = poisson_rng(fert_cu);
+   }
+}
+

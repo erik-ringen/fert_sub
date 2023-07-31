@@ -4,7 +4,15 @@ require(furrr)
 plan(multisession, workers = availableCores())
 options(future.rng.onMisuse = "ignore")
 
-fig_4_b <- function(fit, data) {
+# Establish color schemes
+subsistence_cols <- c("#E69F00", "#0072B2", "#009E73", "#D55E00", "#CC79A7", "indianred", "black")
+names(subsistence_cols) <- c("Ag", "fish", "HG", "hort", "labour", "past", "Average")
+
+col_scale <- scale_color_manual(name = "subtype", values = subsistence_cols)
+fill_scale <- scale_fill_manual(name = "subtype", values = subsistence_cols) 
+
+fig_4_b <- function(fit, d) {
+  data <- stan_data(d)
   post <- extract.samples(fit)
   n_samps <- length(post$lp__)
   
@@ -24,18 +32,18 @@ fig_4_b <- function(fit, data) {
   )
   
   d_pop <- data$df %>%
-    group_by(population) %>% 
+    group_by(pop_name) %>% 
     summarise(pop_id = unique(pop_id), subsist = unique(subsist), MI = unique(MI))
   
   pop_pred <- left_join(pop_pred, d_pop)
   
-  pop_pred$population <- fct_reorder(pop_pred$population, as.numeric(as.factor(pop_pred$subsist)))
+  pop_pred$pop_name <- fct_reorder(pop_pred$pop_name, as.numeric(as.factor(pop_pred$subsist)))
 
   pop_pred$MI <- factor(pop_pred$MI, labels = c("Low MI", "Medium MI", "High MI"))
   
-  fert_age_60 <- ggplot(pop_pred, aes(x = med, y = fct_reorder(population, med), color = subsist)) + 
+  fert_age_60 <- ggplot(pop_pred, aes(x = med, y = fct_reorder(pop_name, med), color = subsist)) + 
     facet_grid(fct_rev(MI)~., scales = "free_y") +
-    geom_errorbarh(aes(xmin = lower, xmax = upper, y = fct_reorder(population, med)), height = 0, lwd = 1.5) +
+    geom_errorbarh(aes(xmin = lower, xmax = upper, y = fct_reorder(pop_name, med)), height = 0, lwd = 1.5) +
     geom_point(size = 3) +
     col_scale +
     theme_minimal(base_size = 18) +

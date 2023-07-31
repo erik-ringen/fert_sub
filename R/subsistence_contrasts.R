@@ -4,11 +4,20 @@ require(furrr)
 plan(multisession, workers = availableCores())
 options(future.rng.onMisuse = "ignore")
 
-subsistence_contrasts <- function(fit, data) {
+# Establish color schemes
+subsistence_cols <- c("#E69F00", "#0072B2", "#009E73", "#D55E00", "#CC79A7", "indianred", "black")
+           names(subsistence_cols) <- c("Ag", "fish", "HG", "hort", "labour", "past", "Average")
+
+col_scale <- scale_color_manual(name = "subtype", values = subsistence_cols)
+fill_scale <- scale_fill_manual(name = "subtype", values = subsistence_cols)           
+
+subsistence_contrasts <- function(fit, d) {
   post <- extract.samples(fit)
   n_samps <- length(post$lp__)
   
   age_pred <- 60
+  
+  data <- stan_data(d, "submode")
 
   d_pred <- expand.grid(age = age_pred, sub = 1:data$data_list$N_sub)
 
@@ -27,7 +36,7 @@ subsistence_contrasts <- function(fit, data) {
     sub_id = d_pred$sub
   )
   
-  data$df$sub_id
+  #data$df$sub_id
   d_pop <- data$df %>%
     group_by(sub_id) %>% 
     summarise(subsist = unique(subsist))

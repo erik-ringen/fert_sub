@@ -2,13 +2,14 @@ data{
     int N_obs;
     int N_id;
     int N_pop;
-    int N_sub;
     array[N_id] int pop_id;
     array[N_obs] int pid;
     vector[N_obs] age;
     array[N_obs] int live_births;
     vector[N_id] birthyear_s;
-    array[N_id] int sub_id;
+    vector[N_id] pred;
+    vector[N_id] wealth_z;
+    int prior_only;
 }
 
 parameters {
@@ -19,26 +20,24 @@ parameters {
     real a_oi;
     
     real b_BY; // avg effect of birth year
-    
-    matrix[N_sub, 2] sub_z; // subtype random effects
-    vector<lower=0>[2] sigma_sub;
+    vector[2] b_pred; // avg effect of linear predictor
+    real b_wealth;
     
     vector[N_pop] pop_BY_z;
     real<lower=0> sigma_pop_BY;
     
     // Random effects //
     matrix[N_id,2] pid_z; // individual-level random effects, unscaled and uncorrelated
-    vector<lower=0>[2] sigma_pid; // scale par for pid, log-scale for better sampling
+    vector<lower=0>[2] sigma_pid; // scale par for pid
 
-    matrix[N_pop,4] pop_z; // population-level random effects
-    vector<lower=0>[4] sigma_pop; // 
+    matrix[N_pop,7] pop_z; // population-level random effects
+    vector<lower=0>[7] sigma_pop; // 
 }
 
 transformed parameters{
   matrix[N_id,2] pid_v;
-  matrix[N_pop,4] pop_v;
+  matrix[N_pop,7] pop_v;
   vector[N_pop] pop_BY_v;
-  matrix[N_sub, 2] sub_v;
   
   vector[N_id] k;
   vector[N_id] b;
@@ -51,17 +50,15 @@ transformed parameters{
   pid_v[n,j] = pid_z[n,j] * sigma_pid[j];
     }
   
-  for (j in 1:4) pop_v[,j] = pop_z[,j] * sigma_pop[j];
+  for (j in 1:7) pop_v[,j] = pop_z[,j] * sigma_pop[j];
 
   pop_BY_v = pop_BY_z * sigma_pop_BY;
-  
-  for (j in 1:2) sub_v[, j] = sub_z[, j] * sigma_sub[j];
 
   // Compose parameters
   for (n in 1:N_id) {
-    k[n] = exp(a_k + pop_v[pop_id[n],1] + pid_v[n,1] + sub_v[sub_id[n], 1]);
+    k[n] = exp(a_k + pop_v[pop_id[n],1] + pid_v[n,1] + (b_pred[1] + pop_v[pop_id[n],5]) * pred[n]);
     b[n] = exp(a_b + pop_v[pop_id[n],2]);
-    alpha[n] = exp(a_alpha + pop_v[pop_id[n],3] + pid_v[n,2] + (b_BY + pop_BY_v[pop_id[n]])*birthyear_s[n] + sub_v[sub_id[n], 2]);
+    alpha[n] = exp(a_alpha + pop_v[pop_id[n],3] + pid_v[n,2] + (b_BY + pop_BY_v[pop_id[n]])*birthyear_s[n] + (b_pred[2] + pop_v[pop_id[n],6]) * pred[n] + (b_wealth + pop_v[pop_id[n],7]) * wealth_z[n]);
     oi[n] = inv_logit(a_oi + pop_v[pop_id[n],4]);
   }
 } // end transformed parameters block
@@ -76,20 +73,21 @@ model{
 
   // Overall effect of birth year
   b_BY ~ std_normal(); // std_normal = Normal(0,1)
+  b_pred ~ std_normal();
+  b_wealth ~ std_normal();
 
   // varying effects, unscaled
   pop_BY_z ~ std_normal();
   to_vector(pid_z) ~ std_normal();
   to_vector(pop_z) ~ std_normal();
-  to_vector(sub_z) ~ std_normal();
 
-  // variance components 
+  // variance components (half normal)
   sigma_pid ~ std_normal();
   sigma_pop ~ std_normal();
   sigma_pop_BY ~ std_normal();
-  sigma_sub ~ std_normal();
 
   // likelihood
+  if (prior_only == 0) {
         for (i in 1:N_obs) { 
         real fert_cu;
 
@@ -106,6 +104,7 @@ model{
           target += log1m(oi[pid[i]]) + poisson_lpmf(live_births[i] | fert_cu);
         }
     }
+  }
 }
 
 generated quantities {
@@ -133,3 +132,4 @@ generated quantities {
     else y_hat[i] = poisson_rng(fert_cu);
    }
 }
+

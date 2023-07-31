@@ -109,7 +109,7 @@ fert_pred <- function(
   
   p_oi <- inv_logit(a_oi + pop_v[,4])
   
-  fert_cu <- (1 - exp(-k*(age/80)))^b * alpha;
+  fert_cu <- (1 - exp(-k*(age/80)))^b * alpha
   
   if (resp == "mean") {
     # incorporate zero-inflation

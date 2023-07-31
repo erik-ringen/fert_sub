@@ -1,7 +1,7 @@
-stan_fit <- function(model_file, data, var) {
+stan_fit <- function(model_file, data, var, wealth_adj = F) {
 
   model <- rstan::stan_model(model_file)
-  data_list <- stan_data(data, var)$data_list
+  data_list <- stan_data(dat = data, variable = var, wealth_adj = wealth_adj)$data_list
 
     fit <- sampling(
         model,
