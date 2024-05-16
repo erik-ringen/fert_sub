@@ -5,6 +5,7 @@ install.packages(c(
  "tidyverse",
     "targets",
     "rethinking",
+    "rstan",
     "patchwork",
     "loo",
     "bayesplot",
