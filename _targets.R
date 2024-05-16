@@ -4,6 +4,7 @@ source("R/functions.R")
 tar_option_set(packages = c(
     "tidyverse",
     "rethinking",
+    "rstan",
     "patchwork",
     "loo",
     "bayesplot",
